@@ -1,130 +1,110 @@
-# CodeCam — Plataforma de Estudos com IA
+# CodeCam – IA para Estudantes
 
-Plataforma web para geração de **resumos estruturados** e **flashcards interativos** a partir de um tema de aula, usando a API do Google Gemini.
+> Inteligência que transforma a imagem em compreensão.
 
----
-
-## Funcionalidades
-
-- **Gerar resumo** — visão estruturada com introdução, subtópicos numerados e conclusão
-- **Gerar flashcards** — cartões embaralhados com flip 3D, avaliação (Acertei / Parcial / Errei) e placar em anel SVG animado
-- **Gerar ambos** — resumo + flashcards em abas separadas no mesmo resultado
-- **Histórico** — lista de todas as gerações com visualização inline, remoção individual e limpeza total
-- **Estatísticas** — contadores de resumos, flashcards e dias de uso persistidos em `localStorage`
+Plataforma web que demonstra como o aplicativo mobile **CodeCam** funcionaria integrado a uma API de IA: o usuário captura uma imagem de anotações, slides ou quadro-negro e recebe automaticamente um **resumo**, lista de **tópicos** e **flashcards** gerados por inteligência artificial.
 
 ---
 
-## Tecnologias
+## Tecnologias utilizadas
 
-| Camada      | Tecnologia                            |
-|-------------|---------------------------------------|
-| Framework   | React 19 + Vite 6                     |
-| Estilização | Tailwind CSS v4 (`@tailwindcss/vite`) |
-| Roteamento  | React Router DOM v7                   |
-| IA          | Google Gemini API `gemini-2.0-flash`  |
-| Persistência| `localStorage` nativo                 |
-
----
-
-## Configuração da chave de API
-
-A chave do Gemini é lida via variável de ambiente — **não é solicitada ao usuário**.
-
-1. Copie o arquivo de exemplo:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Abra `.env` e substitua o valor:
-   ```env
-   VITE_GEMINI_API_KEY=AIzaSy...sua_chave_aqui
-   ```
-
-3. Obtenha sua chave gratuitamente em [Google AI Studio](https://aistudio.google.com/app/apikey).
-
-> O arquivo `.env` está no `.gitignore` e nunca deve ser commitado.
+| Tecnologia           | Versão         | Uso                                                 |
+| -------------------- | -------------- | --------------------------------------------------- |
+| React                | 18             | Biblioteca de UI com componentes funcionais         |
+| Vite                 | 6              | Bundler e servidor de desenvolvimento               |
+| React Router DOM     | 6              | Navegação entre páginas (SPA)                       |
+| JavaScript (ES2022+) | —              | Lógica da aplicação                                 |
+| Tailwind CSS         | 4.3.3          | Estilização por classes utilitárias                 |
+| localStorage         | Web API nativa | Persistência local de dados                         |
+| Math (built-in JS)   | —              | Operações matemáticas, randomização, arredondamento |
 
 ---
 
-## Instalação e execução
+## Pré-requisitos
+
+- **Node.js** ≥ 18
+- **npm** ≥ 9
+
+---
+
+## Como instalar as dependências
 
 ```bash
-# 1. Instale as dependências
+cd codecam
 npm install
+```
 
-# 2. Configure a chave de API (ver seção acima)
-cp .env.example .env
+---
 
-# 3. Inicie o servidor de desenvolvimento
+## Como executar o projeto
+
+### Modo desenvolvimento
+
+```bash
 npm run dev
 ```
 
-Acesse `http://localhost:5173` no navegador.
+Acesse **http://localhost:5173** no navegador.
 
----
+### Configurando a API Gemini (opcional, mas recomendado)
 
-## Build de produção
+A aplicação funciona sem chave (usando exemplos locais), mas para ver a IA real em ação:
+
+1. Acesse [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) e gere uma chave gratuita.
+   **(`.env`):**
+   ```bash
+   cp .env.example .env
+   # edite .env e preencha VITE_GEMINI_API_KEY=AIza...
+   ```
+   Depois reinicie o servidor de desenvolvimento.
+
+> O modelo usado é **gemini-3.6-flash**, que está no nível gratuito do Google AI Studio.
+
+### Build de produção
 
 ```bash
 npm run build
+npm run preview   # visualizar o build localmente
 ```
 
-Os arquivos gerados ficam em `dist/` e podem ser servidos por qualquer servidor estático (Vercel, Netlify, etc.).
+## Armazenamento de dados
 
-> Em produção, defina `VITE_GEMINI_API_KEY` como variável de ambiente na plataforma de deploy — nunca inclua `.env` no repositório.
-
----
-
-## Estrutura do projeto
-
-```
-src/
-  components/
-    FlashcardDeck.jsx   # Deck com flip 3D, avaliação e placar em anel SVG
-    Header.jsx          # Barra glassmorphism com navegação
-    Layout.jsx          # Wrapper com header e footer
-    SummaryView.jsx     # Exibição estruturada do resumo
-  pages/
-    GeneratePage.jsx    # Formulário + resultado (hero, seletor de tipo, tabs)
-    HistoryPage.jsx     # Histórico + estatísticas + barra de distribuição
-  services/
-    gemini.js           # Integração com a API Gemini (lê chave do .env)
-  utils/
-    math.js             # Utilitários: clamp, shuffle, scorePercent, generateId...
-    storage.js          # localStorage: histórico, estatísticas
-  App.jsx
-  main.jsx
-  index.css             # Paleta, tema global, utilitários Tailwind v4
-```
+Todos os dados são salvos no **localStorage** do navegador sob a chave `codecam_capturas`. Nenhum dado é enviado para servidor externo.
 
 ---
 
-## Utilitários matemáticos (`utils/math.js`)
+## Uso de Math (operações matemáticas)
 
-| Função          | Operação principal          | Uso na aplicação                          |
-|-----------------|-----------------------------|-------------------------------------------|
-| `clamp`         | `Math.min` / `Math.max`     | Clampear progresso entre 0 e 1            |
-| `randomInt`     | `Math.floor` + `Math.random`| Variar quantidade de flashcards (±1)      |
-| `shuffle`       | Fisher-Yates + `Math.random`| Embaralhar deck de flashcards             |
-| `scorePercent`  | `Math.round`                | Calcular percentual de acertos            |
-| `progressRatio` | `clamp`                     | Barra de progresso do deck                |
-| `formatPercent` | `Math.round`                | Exibir percentual na barra de distribuição|
-| `daysSince`     | `Math.floor`                | Dias de uso na tela de estatísticas       |
-| `generateId`    | `Date.now` + `Math.random`  | IDs únicos para entradas do histórico     |
-| `scoreLabel`    | Comparações numéricas       | Rótulo de desempenho no resultado final   |
+O projeto utiliza diversas operações do objeto `Math` nativo do JavaScript:
+
+- `Math.random()` – geração de IDs únicos, escolha aleatória de respostas do banco de IA, randomização de latência simulada
+- `Math.floor()` – arredondamento para baixo (índices, percentuais)
+- `Math.round()` – arredondamento de médias e percentuais de confiança
+- `Math.max()` / `Math.min()` – cálculo de valores extremos para escala dos gráficos de barra
+- Algoritmo **Fisher-Yates** (com `Math.random`) – embaralhamento dos flashcards
+
+Arquivo principal: `src/utils/stats.js` e `src/utils/aiMock.js`.
 
 ---
 
-## Variáveis de ambiente
+## Uso de Inteligência Artificial no projeto
 
-| Variável               | Obrigatória | Descrição                        |
-|------------------------|-------------|----------------------------------|
-| `VITE_GEMINI_API_KEY`  | Sim         | Chave da API do Google Gemini    |
+> **Como a IA foi utilizada:**  
+> Durante o desenvolvimento, utilizamos o Kiro como uma ferramenta de apoio, principalmente para tirar dúvidas, sugerir soluções de código e auxiliar em alguns ajustes pontuais. O desenvolvimento foi realizado pelo grupo, incluindo a estrutura dos componentes, estilização, implementação das funcionalidades e aplicação das regras de negócio.
+
+> A IA também ajudou bastante nas fórmulas matemáticas, conceitos mais difíceis e na revisão de determinados trechos. As decisões sobre a organização e o funcionamento da aplicação foram definidas pelo grupo e ajustadas conforme os testes realizados durante o desenvolvimento.
 
 ---
 
-## Observações
+## Projeto acadêmico
 
-- Histórico e estatísticas ficam no `localStorage` do navegador — limpar o storage apaga tudo.
-- A quantidade de flashcards pode variar ±1 em relação ao valor selecionado, por design.
-- Nenhum backend próprio — toda comunicação ocorre diretamente entre o browser e a API do Google.
+- **Instituição:** FIAP
+- **Turma:** 1ESPW-26
+- **Sprint:** 3
+- **Ano:** 2025
+- **Integrantes:**
+  - Lívia Laur – RM: 569017
+  - Lara Beatriz – RM: 572589
+  - Rafael Dias – RM: 570504
+  - Gustavo Pereira – RM: 570549
+  - Luca Baccari – RM: 569807
